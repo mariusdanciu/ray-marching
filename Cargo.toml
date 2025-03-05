@@ -1,0 +1,22 @@
+[package]
+name = "ray-tracing"
+version = "0.1.0"
+edition = "2021"
+
+[build]
+rustc-args = ["-Vv"]
+
+
+[dependencies.sdl2]
+version = "0.37.0"
+default-features = false
+features = ["ttf", "image"]
+
+
+[dependencies]
+rand = "0.8.5"
+fontdue-sdl2="0.3.2"
+glam="0.28.0"
+rayon="1.10.0"
+image="0.25.5"
+num_cpus="1.0"
