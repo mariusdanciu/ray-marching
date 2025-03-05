@@ -1,11 +1,10 @@
-use glam::{vec3, Vec3, Vec4};
+use glam::{ Vec3, Vec4};
 
 use glam::vec4;
 use rand::rngs::ThreadRng;
 
 use crate::light::Light;
-use crate::ray::{Ray, RayMarchingHit};
-use crate::ray_marching::ray_marching::HIT_PRECISION;
+use crate::ray::Ray;
 use crate::ray_marching::RayMarching;
 use crate::utils::materials::Material;
 use crate::utils::math;

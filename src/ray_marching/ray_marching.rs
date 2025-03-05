@@ -88,6 +88,13 @@ impl<'a> RayMarching<'a> {
             let light_dis = l.distance(*point);
             l_acc += (phong / (light_dis * light_dis)) * l.albedo() * l.intensity();
 
+            l_acc *= self.shadow(
+                &Ray {
+                    origin: *point + (*normal) * 0.001,
+                    direction: -l.direction(*point),
+                },
+                32.,
+            );
             // let s = self.soft_shadow(
             //     hit.point + hit.normal * 0.01,
             //     -l.direction(hit.point),
@@ -99,6 +106,23 @@ impl<'a> RayMarching<'a> {
         }
 
         l_acc.powf(0.4545)
+    }
+
+    pub fn shadow(&self, ray: &Ray, k: f32) -> f32 {
+        let mut res = 1.0f32;
+
+        let mut t = 0.01;
+        for i in 0..128 {
+            let pos = ray.origin + ray.direction * t;
+            let h = (self.scene.sdf)(self.scene, ray, t).dist;
+            res = res.min(k * (h.max(0.0) / t));
+            if res < 0.0001 || pos.y > 10.0 {
+                break;
+            }
+            t += h.clamp(0.01, 5.0);
+        }
+
+        return res;
     }
 
     pub fn march_ray(&self, ray: &Ray) -> Option<Hit> {

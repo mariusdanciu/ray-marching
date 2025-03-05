@@ -3,7 +3,7 @@ use ray_tracing::app::App3D;
 use ray_tracing::camera::Camera;
 use ray_tracing::light::{Directional, Light};
 use ray_tracing::ray::Ray;
-use ray_tracing::ray_marching::sdfs::{box_sdf, cylinder_sdf, plane_sdf, sphere_sdf};
+use ray_tracing::ray_marching::sdfs::{box_sdf, cylinder_sdf, plane_sdf};
 use ray_tracing::renderer::Renderer;
 use ray_tracing::scene::{Hit, Scene};
 use ray_tracing::utils::materials::{Material, MaterialType};
@@ -119,7 +119,7 @@ pub fn main() -> Result<(), AppError> {
         .with_texture(ImageUtils::load_image("./resources/earth_clouds.jpg")?);
 
     let mut renderer = Renderer::new();
-    let mut camera = Camera::new_with_pos(Vec3::new(0., 2., 4.0), Vec3::new(0., 0., -1.));
+    let mut camera = Camera::new_with_pos(Vec3::new(0., 4., 7.0), Vec3::new(0., 0., -1.));
 
     App3D::run(&mut camera, &mut scene, &mut renderer)
 }
