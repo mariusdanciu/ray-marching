@@ -67,7 +67,7 @@ impl Scene {
 
             col *= occ;
             // color *= geometry::fog(color, t, vec3(0., 0., 0.), 0.05); //(-0.05 * t).exp();
-            //col *= 1.0 - math::smooth_step(1.0, 20.0, hit.dist);
+            col *= 1.0 - math::smooth_step(1.0, 40.0, hit.dist);
 
             res = col;
         }
