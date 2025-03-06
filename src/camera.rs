@@ -23,25 +23,23 @@ pub enum CameraEvent {
 }
 
 impl Camera {
-
     pub fn new_with_pos(position: Vec3, look_at: Vec3) -> Camera {
         let ta = look_at.normalize();
 
-        let ww = ta;
+        let ww = (ta - position).normalize();
         let uu = ww.cross(vec3(0., 1., 0.)).normalize();
         let vv = uu.cross(ww).normalize();
 
         Camera {
             resolution: vec2(800., 600.),
             position,
-            uu, 
+            uu,
             vv,
-            ww
+            ww,
         }
     }
 
     pub fn update(&mut self, events: &Vec<CameraEvent>, ts: f32) {
-        //let right_direction = self.forward_direction.cross(UP);
         let speed = 5.;
         let rotation_speed = 5.;
         for event in events {
@@ -57,6 +55,15 @@ impl Camera {
                 CameraEvent::RotateXY { delta } => {
                     let pitch_delta = delta.y * rotation_speed;
                     let yaw_delta = delta.x * rotation_speed;
+
+                    let rotation = Mat4::from_rotation_x(pitch_delta as f32 * math::DEGREES)
+                        * Mat4::from_rotation_y(yaw_delta as f32 * math::DEGREES);
+
+                    let fd = rotation * Vec4::new(self.ww.x, self.ww.y, self.ww.z, 1.);
+
+                    self.ww = Vec3::new(fd.x, fd.y, fd.z).normalize();
+                    self.uu = self.ww.cross(vec3(0., 1., 0.)).normalize();
+                    self.vv = self.uu.cross(self.ww).normalize();
                 }
             }
         }
