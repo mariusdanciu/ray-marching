@@ -3,7 +3,7 @@ use ray_tracing::app::App3D;
 use ray_tracing::camera::Camera;
 use ray_tracing::light::{Directional, Light};
 use ray_tracing::ray::Ray;
-use ray_tracing::ray_marching::sdfs::{box_sdf, cylinder_sdf, plane_sdf};
+use ray_tracing::ray_marching::sdfs::{box_sdf, cylinder_sdf, line_sdf, plane_sdf, sphere_sdf};
 use ray_tracing::renderer::Renderer;
 use ray_tracing::scene::{Hit, Scene};
 use ray_tracing::utils::materials::{Material, MaterialType};
@@ -15,46 +15,58 @@ fn modulo(x: f32, y: f32) -> f32 {
 }
 
 fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
-    let mut p = ray.origin + ray.direction * t;
+    let p = ray.origin + ray.direction * t;
 
     // plane
     let d1 = plane_sdf(p, vec3(0., 0., 0.), vec3(0., 1., 0.));
     let mut d = d1;
-
-    let k = math::rep_xz_lim(p.xz(), 2., vec2(2., 2.));
-    p.x = k.x;
-    p.z = k.y;
-
-    // p.x = modulo(p.x + 1., 2.) - 1.;
-    // p.z = modulo(p.z + 1., 2.) - 1.;
-
-    // let d2 = sphere_sdf(vec3(-1., 0.4, -0.2) - p, 0.5);
-    {
-        let mut q = vec3(0., 1.5, 0.2) - p;
-
-        let radius: f32 = 0.2 + 0.05 * q.y;
-        let radius = radius + 0.05 * (0.5 + (16.0 * (q.x / q.z).atan()).sin() * 0.5).powf(2.);
-        let radius = radius + 0.05 * (0.5 + 0.5 * (q.y * 10.0).sin()).powf(0.1);
-
-        let d2 = cylinder_sdf(q, radius, 0.0, 3.) * 0.5;
-
-        d = d.min(d2);
-    }
-    {
-        //let q = vec3(p.x, p.y.abs() - 1.0, p.z);
-        let mut q = vec3(0., 1.5, 0.2) - p;
-
-        q = vec3(q.x, (q.y + 0.1).abs() - 1.5, q.z);
-        let d3 = box_sdf(q, vec3(0.5, 0.1, 0.5)) * 0.5;
-
-        d = d.min(d3);
-    }
-
     let mut mat = 1;
+
+    {
+        // Pillars
+
+        let bounding_vol_d = box_sdf(vec3(0., 0., 0.2) - p, vec3(8., 4.0, 8.), 0.0);
+        if d > bounding_vol_d {
+            let mut p = p;
+            let k = math::rep_xz_lim(p.xz(), 3., vec2(2., 2.));
+            p.x = k.x;
+            p.z = k.y;
+
+            // p.x = modulo(p.x + 1., 2.) - 1.;
+            // p.z = modulo(p.z + 1., 2.) - 1.;
+
+            // let d2 = sphere_sdf(vec3(-1., 0.4, -0.2) - p, 0.5);
+
+            let mut q = vec3(0., 1.5, 0.2) - p;
+
+            let radius: f32 = 0.2 + 0.05 * q.y;
+            let radius = radius + 0.05 * (0.5 + (16.0 * (q.x / q.z).atan()).sin() * 0.5).powf(2.);
+            let radius = radius + 0.05 * (0.5 + 0.5 * (q.y * 10.0).sin()).powf(0.1);
+
+            let d2 = cylinder_sdf(q, radius, 0.0, 3.) * 0.5;
+
+            d = d.min(d2);
+
+            let mut q = vec3(0., 1.5, 0.2) - p;
+
+            q = vec3(q.x, (q.y + 0.1).abs() - 1.5, q.z);
+            let d3 = box_sdf(q, vec3(0.5, 0.1, 0.5), 0.1) * 0.5;
+
+            d = d.min(d3);
+        }
+    }
+    {
+        let q = vec3(-1., 0.8, 7.) - p;
+        //let tex = scene.textures[3].from_uv(q.x, q.y).y / 25.;
+        let r = 0.8;
+        let d4 = sphere_sdf(q, r) * 0.5;
+        d = d.min(d4);
+    }
 
     if d == d1 {
         mat = 0;
     }
+
     Hit {
         dist: d,
         material_index: mat,
@@ -105,7 +117,7 @@ pub fn main() -> Result<(), AppError> {
         ],
         sdf,
     );
-    //scene.ambient_color = vec3(0.2, 0.5, 1.);
+    scene.ambient_color = (vec3(0.5, 0.8, 1.));
     scene.lights = vec![Light::Directional(Directional {
         albedo: vec3(1., 1., 1.),
         direction: vec3(-1., -1., -2.).normalize(),

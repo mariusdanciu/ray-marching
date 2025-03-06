@@ -1,5 +1,7 @@
-
 use glam::{vec2, vec3, Mat4, Vec2, Vec2Swizzles, Vec3, Vec3Swizzles};
+use image::math;
+
+use crate::ray::Ray;
 
 use super::texture::Texture;
 
@@ -68,8 +70,10 @@ pub fn tri_planar_mapping(p: Vec3, n: Vec3, blending: f32, scale: f32, tex: &Tex
     x * bw.x + y * bw.y + z * bw.z
 }
 
-pub fn fog(col: Vec3, t: f32, fog_color: Vec3, density: f32) -> Vec3 {
-    let fog_amount = 1.0 - (-t * density).exp2();
+pub fn fog(col: Vec3, t: f32, ray: &Ray, b: f32) -> Vec3 {
+    let fog_amount = (b) * (-ray.origin.y * b).exp() * (1.0 - (-t * ray.direction.y * b).exp())
+        / ray.direction.y;
+    let fog_color = vec3(0.5, 0.5, 0.5);
     mix_vec3(col, fog_color, fog_amount)
 }
 

@@ -7,8 +7,8 @@ use crate::ray::{Ray, RayHit};
 use crate::scene::{Hit, Scene};
 use crate::utils::materials::Material;
 
-static MAX_STEPS: usize = 255;
-static MAX_DISTANCE: f32 = 40.;
+static MAX_STEPS: usize = 300;
+static MAX_DISTANCE: f32 = 100.;
 pub static HIT_PRECISION: f32 = 0.001;
 static INV_PI: f32 = 1. / f32::consts::PI;
 
