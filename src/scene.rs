@@ -63,7 +63,7 @@ impl Scene {
             origin: camera.position,
             direction: (p.x * camera.uu + p.y * camera.vv + 1.5 * camera.ww).normalize(),
         };
-        
+
         let rm = RayMarching { scene: self };
         let c = vec3(0.65, 0.75, 0.9) - 0.7 * ray.direction.y;
         let ambient_col = math::mix_vec3(c, vec3(0.7, 0.75, 0.8), (-10.0 * ray.direction.y).exp());
@@ -91,7 +91,7 @@ impl Scene {
             //col *= occlusion;
             let light_dir = -l.direction(p);
             let sun = n.dot(light_dir).clamp(0.0, 1.0);
-            let sky = (0.5 + 0.5 * n.y).clamp(0.0, 1.0);
+            let sky = vec3(0.6, 0.7, 0.8) - (0.2 * n.y); //.clamp(0.0, 1.0);
             let indirect = n
                 .dot((light_dir * vec3(-1.0, 0.0, -1.0)).normalize())
                 .clamp(0.0, 1.0);
@@ -107,7 +107,7 @@ impl Scene {
             let mut lin = sun
                 * vec3(1.64, 1.27, 0.99)
                 * math::pow_vec3(Vec3::splat(shadow), vec3(1.0, 1.2, 1.5));
-            lin += sky * vec3(0.16, 0.20, 0.28) * occlusion;
+            lin += sky * occlusion;
             lin += indirect * vec3(0.40, 0.28, 0.20) * occlusion;
 
             col *= lin;
