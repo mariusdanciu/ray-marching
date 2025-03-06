@@ -1,7 +1,7 @@
 use glam::{vec2, vec3, Vec3, Vec3Swizzles};
 use ray_tracing::app::App3D;
 use ray_tracing::camera::Camera;
-use ray_tracing::light::{Directional, Light};
+use ray_tracing::light::{Directional, Light, LightSource};
 use ray_tracing::ray::Ray;
 use ray_tracing::ray_marching::sdfs::{box_sdf, cylinder_sdf, line_sdf, plane_sdf, sphere_sdf};
 use ray_tracing::renderer::Renderer;
@@ -10,8 +10,15 @@ use ray_tracing::utils::materials::{Material, MaterialType};
 use ray_tracing::utils::math;
 use ray_tracing::utils::{errors::AppError, image::ImageUtils};
 
-fn modulo(x: f32, y: f32) -> f32 {
-    x - y * (x / y).floor()
+fn update(scene: &mut Scene, time: f32) -> bool {
+    let  l = &mut scene.lights[0];
+    if let Light::Directional (d) = l {
+        d.direction.z = (time*0.4).sin();
+        //d.direction.x = (time*0.4).cos()*0.94;
+       // d.direction.x = 1. * (time*0.5).cos();
+        d.direction = d.direction.normalize();
+    }
+    true
 }
 
 fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
@@ -116,11 +123,12 @@ pub fn main() -> Result<(), AppError> {
             },
         ],
         sdf,
+        update
     );
     scene.ambient_color = (vec3(0.5, 0.8, 1.));
     scene.lights = vec![Light::Directional(Directional {
         albedo: vec3(1., 1., 1.),
-        direction: vec3(-1., -1., -2.).normalize(),
+        direction: vec3(-1., -0.5, -5.).normalize(),
         intensity: 1.,
     })];
 

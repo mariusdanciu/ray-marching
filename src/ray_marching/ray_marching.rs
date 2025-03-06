@@ -55,7 +55,7 @@ impl<'a> RayMarching<'a> {
     pub fn occlusion(&self, pos: Vec3, nor: Vec3) -> f32 {
         let mut occ = 0.0f32;
         let mut sca = 1.0f32;
-        for i in 0..3 {
+        for i in 0..5 {
             let hr = 0.02 + 0.025 * (i * i) as f32;
             //let aopos = nor * hr + pos;
             let f = self.scene.sdf;

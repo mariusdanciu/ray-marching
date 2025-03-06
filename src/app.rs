@@ -12,7 +12,6 @@ use crate::renderer::Renderer;
 use crate::scene::Scene;
 use crate::utils::errors::AppError;
 
-
 pub struct App3D {}
 
 impl App3D {
@@ -21,7 +20,6 @@ impl App3D {
         scene: &mut Scene,
         renderer: &mut Renderer,
     ) -> Result<(), AppError> {
-
         let sdl_context = sdl2::init()?;
 
         let video_subsystem = sdl_context.video()?;
@@ -78,7 +76,6 @@ impl App3D {
         let mut left = false;
         let mut right = false;
         let num_cores = 200; //num_cpus::get();
-
 
         'running: loop {
             let elapsed = frame_time.elapsed();
@@ -216,12 +213,11 @@ impl App3D {
                 }
 
                 // App state updates here.
-                // if let Some(f) = scene.update_func {
-                //     let u = f(scene, start.elapsed().as_secs_f32());
-                //     if !updated {
-                //         updated = u;
-                //     }
-                // }
+
+                let u: bool = (scene.update)(scene, start.elapsed().as_secs_f32());
+                if !updated {
+                    updated = u;
+                }
 
                 ups += 1;
                 delta -= 1.;

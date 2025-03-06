@@ -24,16 +24,21 @@ pub struct Scene {
     pub lights: Vec<Light>,
 
     pub sdf: fn(&Scene, &Ray, f32) -> Hit,
+    pub update: fn(&mut Scene, time: f32) -> bool
 }
 
 impl Scene {
-    pub fn new(materials: Vec<Material>, sdf: fn(&Scene, &Ray, f32) -> Hit) -> Scene {
+    pub fn new(materials: Vec<Material>, 
+        sdf: fn(&Scene, &Ray, f32) -> Hit,
+        update: fn(&mut Scene, time: f32) -> bool
+    ) -> Scene {
         Scene {
             materials,
             textures: vec![],
             ambient_color: Vec3::ZERO,
             lights: vec![],
             sdf,
+            update
         }
     }
 
@@ -56,7 +61,15 @@ impl Scene {
         let mut res = ambient_col;
 
         let l = &self.lights[0];
+
+        let sundot = ray.direction.dot(-l.direction(Vec3::ZERO)).clamp(0.0, 1.0);
+
+        res += 0.25 * vec3(1.0, 0.7, 0.4) * sundot.powf(5.0);
+        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(64.0);
+        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(512.0);
+
         if let Some(hit) = rm.march_ray(ray) {
+            res = Vec3::ZERO;
             let p = ray.origin + ray.direction * hit.dist;
             let n = rm.normal(p);
 
@@ -65,8 +78,8 @@ impl Scene {
 
             //let mut col = rm.light(ray, &n, &p, col, &mat);
 
-            
             let occlusion = rm.occlusion(p, n);
+            //col *= occlusion;
             let light_dir = -l.direction(p);
             let sun = n.dot(light_dir).clamp(0.0, 1.0);
             let sky = (0.5 + 0.5 * n.y).clamp(0.0, 1.0);
@@ -92,15 +105,9 @@ impl Scene {
 
             //col = math::fog(col, hit.dist, ray, 0.2);
 
-         
             res = col;
         }
 
-        let sundot = ray.direction.dot(-l.direction(Vec3::ZERO)).clamp(0.0, 1.0);
-
-        res += 0.25 * vec3(1.0, 0.7, 0.4) * sundot.powf(5.0);
-        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(64.0);
-        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(512.0);
 
 
         res = res.powf(0.4545);
