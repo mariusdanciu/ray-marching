@@ -1,4 +1,4 @@
-use glam::Vec4;
+use glam::{uvec2, vec2, Vec4};
 use rand::rngs::ThreadRng;
 use sdl2::render::Texture;
 
@@ -46,28 +46,13 @@ impl Renderer {
         let mut i = 0;
 
         for pos in 0..chunk.size {
-            let ray_dir = camera.ray_directions[pos + chunk.pixel_offset];
+            let offset = pos + chunk.pixel_offset;
+            let y = offset / camera.resolution.x as usize;
+            let x = offset - (y * camera.resolution.x as usize);
 
-            let p = scene.color(
-                &Ray {
-                    origin: camera.position,
-                    direction: ray_dir,
-                },
-                rnd,
-            );
+            let p = scene.color(camera, vec2(x as f32, y as f32));
 
-            let color = if self.enable_accumulation {
-                self.accumulated[pos] += p;
-
-                let mut accumulated = self.accumulated[pos];
-                accumulated /= self.frame_index as f32;
-                accumulated = accumulated.clamp(Vec4::ZERO, Vec4::ONE);
-
-                Self::to_rgba(accumulated)
-            } else {
-                self.accumulated[pos] = p.clamp(Vec4::ZERO, Vec4::ONE);
-                Self::to_rgba(self.accumulated[pos])
-            };
+            let color = Self::to_rgba(p.clamp(Vec4::ZERO, Vec4::ONE));
 
             bytes[i] = color.0;
             bytes[i + 1] = color.1;
@@ -87,11 +72,9 @@ impl Renderer {
         updated: bool,
         num_chunks: usize,
     ) -> Result<(), String> {
-        let w = camera.width;
-        let h = camera.height;
-
         if updated {
-            self.accumulated = vec![Vec4::ZERO; w * h];
+            self.accumulated =
+                vec![Vec4::ZERO; (camera.resolution.x * camera.resolution.y) as usize];
             self.frame_index = 1;
         }
 
@@ -143,7 +126,7 @@ impl Renderer {
         }
 
         texture
-            .update(None, img.as_slice(), w * 4)
+            .update(None, img.as_slice(), camera.resolution.x as usize * 4)
             .map_err(|e| e.to_string())?;
 
         self.frame_index += 1;

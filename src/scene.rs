@@ -1,8 +1,9 @@
-use glam::{Vec3, Vec4};
+use glam::{vec2, UVec2, Vec2, Vec3, Vec4};
 
 use glam::{vec3, vec4};
 use rand::rngs::ThreadRng;
 
+use crate::camera::Camera;
 use crate::light::{Light, LightSource};
 use crate::ray::Ray;
 use crate::ray_marching::RayMarching;
@@ -24,13 +25,14 @@ pub struct Scene {
     pub lights: Vec<Light>,
 
     pub sdf: fn(&Scene, &Ray, f32) -> Hit,
-    pub update: fn(&mut Scene, time: f32) -> bool
+    pub update: fn(&mut Scene, time: f32) -> bool,
 }
 
 impl Scene {
-    pub fn new(materials: Vec<Material>, 
+    pub fn new(
+        materials: Vec<Material>,
         sdf: fn(&Scene, &Ray, f32) -> Hit,
-        update: fn(&mut Scene, time: f32) -> bool
+        update: fn(&mut Scene, time: f32) -> bool,
     ) -> Scene {
         Scene {
             materials,
@@ -38,7 +40,7 @@ impl Scene {
             ambient_color: Vec3::ZERO,
             lights: vec![],
             sdf,
-            update
+            update,
         }
     }
 
@@ -54,7 +56,14 @@ impl Scene {
         s
     }
 
-    pub fn color(&self, ray: &Ray, rnd: &mut ThreadRng) -> Vec4 {
+    pub fn color(&self, camera: &Camera, coord: Vec2) -> Vec4 {
+        let p = (2.0 * coord - camera.resolution) / (1. - camera.resolution.y);
+
+        let ray = &Ray {
+            origin: camera.position,
+            direction: (p.x * camera.uu + p.y * camera.vv + 1.5 * camera.ww).normalize(),
+        };
+        
         let rm = RayMarching { scene: self };
         let c = vec3(0.65, 0.75, 0.9) - 0.7 * ray.direction.y;
         let ambient_col = math::mix_vec3(c, vec3(0.7, 0.75, 0.8), (-10.0 * ray.direction.y).exp());
@@ -107,8 +116,6 @@ impl Scene {
 
             res = col;
         }
-
-
 
         res = res.powf(0.4545);
         vec4(res.x, res.y, res.z, 1.0)

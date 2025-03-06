@@ -11,11 +11,11 @@ use ray_tracing::utils::math;
 use ray_tracing::utils::{errors::AppError, image::ImageUtils};
 
 fn update(scene: &mut Scene, time: f32) -> bool {
-    let  l = &mut scene.lights[0];
-    if let Light::Directional (d) = l {
-        d.direction.z = (time*0.4).sin();
+    let l = &mut scene.lights[0];
+    if let Light::Directional(d) = l {
+        d.direction.z = (time * 0.4).sin();
         //d.direction.x = (time*0.4).cos()*0.94;
-       // d.direction.x = 1. * (time*0.5).cos();
+        // d.direction.x = 1. * (time*0.5).cos();
         d.direction = d.direction.normalize();
     }
     true
@@ -123,7 +123,7 @@ pub fn main() -> Result<(), AppError> {
             },
         ],
         sdf,
-        update
+        update,
     );
     scene.ambient_color = (vec3(0.5, 0.8, 1.));
     scene.lights = vec![Light::Directional(Directional {
