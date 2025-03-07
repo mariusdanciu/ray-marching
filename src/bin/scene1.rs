@@ -24,10 +24,17 @@ fn update(scene: &mut Scene, time: f32) -> bool {
 fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
     let p = ray.origin + ray.direction * t;
 
-    // plane
-    let d1 = plane_sdf(p, vec3(0., 0., 0.), vec3(0., 1., 0.));
-    let mut d = d1;
+    let mut d = f32::MAX;
     let mut mat = 1;
+    let mut col = scene.materials[1].albedo;
+
+    // plane
+    //let d1 = plane_sdf(p, vec3(0., 0., 0.), vec3(0., 1., 0.));
+    let fh = -0.1 + 0.5 * ((p.x * 0.5).sin() + (p.z * 0.5).sin());
+    let d1 = p.y - fh;
+
+    d = d1;
+    mat = 0;
 
     {
         // Pillars
@@ -39,12 +46,7 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
             p.x = k.x;
             p.z = k.y;
 
-            // p.x = modulo(p.x + 1., 2.) - 1.;
-            // p.z = modulo(p.z + 1., 2.) - 1.;
-
-            // let d2 = sphere_sdf(vec3(-1., 0.4, -0.2) - p, 0.5);
-
-            let mut q = vec3(0., 1.5, 0.2) - p;
+            let q = vec3(0., 1.5, 0.2) - p;
 
             let radius: f32 = 0.2 + 0.05 * q.y;
             let radius = radius + 0.05 * (0.5 + (16.0 * (q.x / q.z).atan()).sin() * 0.5).powf(2.);
@@ -71,12 +73,22 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
     }
 
     if d == d1 {
+        col = scene.materials[0].albedo;
+        let f = 0.2
+            * (-1.
+                + 2. * math::smooth_step(
+                    -0.2,
+                    0.2,
+                    28.0 * (p.x * 8.).sin() + 28.0 * (p.y * 8.).sin() + 28.0 * (p.z * 8.).sin(),
+                ));
+        col += 0.4 * f;
         mat = 0;
     }
 
     Hit {
         dist: d,
         material_index: mat,
+        color: col,
     }
 }
 
@@ -88,7 +100,7 @@ pub fn main() -> Result<(), AppError> {
                 diffuse: 0.2,
                 shininess: 85.,
                 specular: 0.8,
-                albedo: Vec3::new(0.5, 0.5, 0.5),
+                albedo: Vec3::new(0.8, 0.6, 0.4),
                 kind: MaterialType::Reflective { roughness: 1. },
                 ..Default::default()
             },
@@ -127,7 +139,7 @@ pub fn main() -> Result<(), AppError> {
     );
     scene.ambient_color = (vec3(0.5, 0.8, 1.));
     scene.lights = vec![Light::Directional(Directional {
-        albedo: vec3(1., 1., 1.),
+        albedo: vec3(0.40, 0.28, 0.20),
         direction: vec3(-1., -0.5, -5.).normalize(),
         intensity: 1.,
     })];
@@ -139,7 +151,7 @@ pub fn main() -> Result<(), AppError> {
         .with_texture(ImageUtils::load_image("./resources/earth_clouds.jpg")?);
 
     let mut renderer = Renderer::new();
-    let mut camera = Camera::new_with_pos(Vec3::new(0., 4., 7.0), Vec3::new(0., 0., -1.));
+    let mut camera = Camera::new_with_pos(Vec3::new(0., 1., 11.0), Vec3::new(0., 0., -1.));
 
     App3D::run(&mut camera, &mut scene, &mut renderer)
 }

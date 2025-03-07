@@ -15,6 +15,7 @@ use crate::utils::texture::Texture;
 pub struct Hit {
     pub dist: f32,
     pub material_index: usize,
+    pub color: Vec3
 }
 
 #[derive(Debug, Clone)]
@@ -65,9 +66,14 @@ impl Scene {
         };
 
         let rm = RayMarching { scene: self };
-        let c = vec3(0.65, 0.75, 0.9) - 0.7 * ray.direction.y;
-        let ambient_col = math::mix_vec3(c, vec3(0.7, 0.75, 0.8), (-10.0 * ray.direction.y).exp());
-        let mut res = ambient_col;
+
+        let sky = vec3(0.5, 0.7, 0.8) - (0.5 * ray.direction.y).clamp(0.0, 1.0);
+        let sky = math::mix_vec3(
+            sky,
+            vec3(0.6, 0.7, 0.8),
+            (-10.0 * ray.direction.y.max(0.0)).exp(),
+        );
+        let mut res = sky;
 
         let l = &self.lights[0];
 
@@ -78,20 +84,18 @@ impl Scene {
         res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(512.0);
 
         if let Some(hit) = rm.march_ray(ray) {
-            res = Vec3::ZERO;
+            //res = Vec3::ZERO;
             let p = ray.origin + ray.direction * hit.dist;
             let n = rm.normal(p);
 
             let mat = self.materials[hit.material_index];
-            let mut col = mat.albedo;
-
-            //let mut col = rm.light(ray, &n, &p, col, &mat);
+            let mut col = hit.color;
 
             let occlusion = rm.occlusion(p, n);
-            //col *= occlusion;
             let light_dir = -l.direction(p);
+
             let sun = n.dot(light_dir).clamp(0.0, 1.0);
-            let sky = vec3(0.6, 0.7, 0.8) - (0.2 * n.y); //.clamp(0.0, 1.0);
+
             let indirect = n
                 .dot((light_dir * vec3(-1.0, 0.0, -1.0)).normalize())
                 .clamp(0.0, 1.0);
@@ -108,7 +112,7 @@ impl Scene {
                 * vec3(1.64, 1.27, 0.99)
                 * math::pow_vec3(Vec3::splat(shadow), vec3(1.0, 1.2, 1.5));
             lin += sky * occlusion;
-            lin += indirect * vec3(0.40, 0.28, 0.20) * occlusion;
+            lin += indirect * l.albedo() * occlusion;
 
             col *= lin;
 
