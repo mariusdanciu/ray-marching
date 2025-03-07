@@ -57,7 +57,7 @@ impl Scene {
         s
     }
 
-    pub fn color(&self, camera: &Camera, coord: Vec2) -> Vec4 {
+    pub fn color(&self, camera: &Camera, coord: Vec2) -> Vec3 {
         let p = (2.0 * coord - camera.resolution) / (1. - camera.resolution.y);
 
         let ray = &Ray {
@@ -122,6 +122,6 @@ impl Scene {
         }
 
         res = res.powf(0.4545);
-        vec4(res.x, res.y, res.z, 1.0)
+        res
     }
 }

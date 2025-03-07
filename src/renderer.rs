@@ -1,4 +1,6 @@
-use glam::{vec2, Vec4};
+use std::num;
+
+use glam::{vec2, Vec3, Vec4};
 use sdl2::render::Texture;
 
 use crate::{camera::Camera, scene::Scene};
@@ -10,32 +12,23 @@ struct Chunk {
 }
 
 pub struct Renderer {
-    // pub accumulated: Vec<Vec4>,
-    pub enable_accumulation: bool,
-    pub max_frames_rendering: u32,
-    pub frame_index: u32,
 }
 
 impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
-            //accumulated: vec![Vec4::ZERO; 800 * 600],
-            enable_accumulation: false,
-            max_frames_rendering: 1000,
-            frame_index: 1,
         }
     }
-    pub fn to_rgba(c: Vec4) -> (u8, u8, u8, u8) {
+    pub fn to_rgba(c: Vec3) -> (u8, u8, u8, u8) {
         (
             (c.x * 255.) as u8,
             (c.y * 255.) as u8,
             (c.z * 255.) as u8,
-            (c.w + 255.) as u8,
+            (255.) as u8,
         )
     }
 
     fn render_chunk(
-        &mut self,
         scene: &Scene,
         camera: &Camera,
         num_pixels: usize,
@@ -44,14 +37,17 @@ impl Renderer {
     ) {
         let mut i = 0;
 
-        for pos in 0..num_pixels {
-            let offset = pos + offset;
-            let y = offset / camera.resolution.x as usize;
-            let x = offset - (y * camera.resolution.x as usize);
+        let mut pos = 0;
+        let res_x = camera.resolution.x as usize;
+        let res_y = camera.resolution.x as usize;
+        while pos < num_pixels {
+            let off = pos + offset;
+            let y = off / res_x;
+            let x = off - (y * res_y);
 
             let p = scene.color(camera, vec2(x as f32, y as f32));
 
-            let color = Self::to_rgba(p.clamp(Vec4::ZERO, Vec4::ONE));
+            let color = Self::to_rgba(p.clamp(Vec3::ZERO, Vec3::ONE));
 
             bytes[i] = color.0;
             bytes[i + 1] = color.1;
@@ -59,6 +55,7 @@ impl Renderer {
             bytes[i + 3] = color.3;
 
             i += 4;
+            pos += 1;
         }
     }
 
@@ -83,20 +80,13 @@ impl Renderer {
 
             let offset = e.0 * num_pixels;
 
-            let mut s = Renderer {
-                enable_accumulation: self.enable_accumulation,
-                max_frames_rendering: self.max_frames_rendering,
-                frame_index: self.frame_index,
-            };
-
-            s.render_chunk(scene, camera, num_pixels, offset, e.1);
+            Self::render_chunk(scene, camera, num_pixels, offset, e.1);
         });
 
         texture
             .update(None, img.as_slice(), camera.resolution.x as usize * 4)
             .map_err(|e| e.to_string())?;
 
-        self.frame_index += 1;
         Ok(())
     }
 }
