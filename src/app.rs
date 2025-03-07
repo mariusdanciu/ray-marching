@@ -18,7 +18,6 @@ impl App3D {
     pub fn run(
         camera: &mut Camera,
         scene: &mut Scene,
-        renderer: &mut Renderer,
     ) -> Result<(), AppError> {
         let sdl_context = sdl2::init()?;
 
@@ -45,6 +44,7 @@ impl App3D {
             .create_texture_streaming(PixelFormatEnum::ABGR8888, size.0, size.1)
             .map_err(|e| e.to_string())?;
 
+        let renderer = Renderer{};
         let mut event_pump = sdl_context.event_pump()?;
         let mut changed: Option<(usize, usize)> = None;
 

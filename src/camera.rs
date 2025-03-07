@@ -23,8 +23,8 @@ pub enum CameraEvent {
 }
 
 impl Camera {
-    pub fn new_with_pos(position: Vec3, look_at: Vec3) -> Camera {
-        let ww = look_at.normalize();
+    pub fn new_with_pos(position: Vec3, forward: Vec3) -> Camera {
+        let ww = forward.normalize();
         let uu = ww.cross(vec3(0., 1., 0.)).normalize();
         let vv = uu.cross(ww).normalize();
 

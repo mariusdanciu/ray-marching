@@ -150,8 +150,7 @@ pub fn main() -> Result<(), AppError> {
         .with_texture(ImageUtils::load_image("./resources/stone3.jpg")?)
         .with_texture(ImageUtils::load_image("./resources/earth_clouds.jpg")?);
 
-    let mut renderer = Renderer::new();
     let mut camera = Camera::new_with_pos(Vec3::new(0., 1., 11.0), Vec3::new(0., 0., -1.));
 
-    App3D::run(&mut camera, &mut scene, &mut renderer)
+    App3D::run(&mut camera, &mut scene)
 }

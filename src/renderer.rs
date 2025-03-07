@@ -11,13 +11,11 @@ struct Chunk {
     pixel_offset: usize,
 }
 
-pub struct Renderer {
-}
+pub struct Renderer {}
 
 impl Renderer {
     pub fn new() -> Renderer {
-        Renderer {
-        }
+        Renderer {}
     }
     pub fn to_rgba(c: Vec3) -> (u8, u8, u8, u8) {
         (
@@ -60,7 +58,7 @@ impl Renderer {
     }
 
     pub fn render(
-        &mut self,
+        &self,
         scene: &mut Scene,
         texture: &mut Texture,
         img: &mut Vec<u8>,
