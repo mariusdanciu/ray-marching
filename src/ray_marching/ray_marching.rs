@@ -77,7 +77,8 @@ impl<'a> RayMarching<'a> {
         let mut res = 1.0f32;
 
         let mut t = 0.01;
-        for i in 0..64 {
+        let mut i = 0;
+        while i < 64 {
             let pos = ray.origin + ray.direction * t;
             let h = (self.scene.sdf)(self.scene, ray, t).dist;
             res = res.min(k * (h.max(0.0) / t));
@@ -85,6 +86,7 @@ impl<'a> RayMarching<'a> {
                 break;
             }
             t += h.clamp(0.01, 5.0);
+            i += 1;
         }
 
         return res;
@@ -106,11 +108,12 @@ impl<'a> RayMarching<'a> {
                 return Some(Hit {
                     dist: t,
                     material_index: h.material_index,
-                    color: h.color
+                    color: h.color,
                 });
             }
             i += 1;
         }
+
         None
     }
 }

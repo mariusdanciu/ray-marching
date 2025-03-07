@@ -103,33 +103,6 @@ pub fn exp2(v: Vec2) -> Vec2 {
     vec2(v.x.exp2(), v.y.exp2())
 }
 
-pub fn fbm(x: Vec2, h: f32) -> f32 {
-    let G = (-h).exp2();
-    let mut f = 1.0;
-    let mut a = 1.0;
-    let mut t = 0.0;
-    for i in 0..2 {
-        t += a * noise(f * x);
-        f *= 2.0;
-        a *= G;
-    }
-    t
-}
-
-pub fn rep_xz(p: Vec2, rep: f32, ax: f32, ay: f32) -> Vec2 {
-    let b = rep * vec2(ax / 2., ay / 2.);
-    let p = p.abs();
-    let w = p - b;
-    let q = w.x > w.y;
-    let u = if q { p.y.min(b.y) } else { p.x.min(b.x) };
-    let u = (u / rep).round() * rep;
-    if q {
-        vec2(w.x, p.y - u)
-    } else {
-        vec2(p.x - u, w.y)
-    }
-}
-
 pub fn rep_xz_lim(p: Vec2, s: f32, lim: Vec2) -> Vec2 {
     p - s * (p / s).round().clamp(-lim, lim)
 }

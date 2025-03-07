@@ -1,8 +1,7 @@
-use glam::{uvec2, vec2, Vec4};
-use rand::rngs::ThreadRng;
+use glam::{vec2, Vec4};
 use sdl2::render::Texture;
 
-use crate::{camera::Camera, ray::Ray, scene::Scene};
+use crate::{camera::Camera, scene::Scene};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 struct Chunk {
@@ -11,7 +10,7 @@ struct Chunk {
 }
 
 pub struct Renderer {
-   // pub accumulated: Vec<Vec4>,
+    // pub accumulated: Vec<Vec4>,
     pub enable_accumulation: bool,
     pub max_frames_rendering: u32,
     pub frame_index: u32,
@@ -35,11 +34,18 @@ impl Renderer {
         )
     }
 
-    fn render_chunk(&mut self, scene: &Scene, camera: &Camera, chunk: Chunk, bytes: &mut [u8]) {
+    fn render_chunk(
+        &mut self,
+        scene: &Scene,
+        camera: &Camera,
+        num_pixels: usize,
+        offset: usize,
+        bytes: &mut [u8],
+    ) {
         let mut i = 0;
 
-        for pos in 0..chunk.size {
-            let offset = pos + chunk.pixel_offset;
+        for pos in 0..num_pixels {
+            let offset = pos + offset;
             let y = offset / camera.resolution.x as usize;
             let x = offset - (y * camera.resolution.x as usize);
 
@@ -65,44 +71,26 @@ impl Renderer {
         updated: bool,
         num_chunks: usize,
     ) -> Result<(), String> {
-        // let s = camera.resolution.x as usize * camera.resolution.y as usize;
-        // if s != self.accumulated.len() {
-        //     self.accumulated =
-        //         vec![Vec4::ZERO; (camera.resolution.x * camera.resolution.y) as usize];
-        // }
-
         let img_len = img.len();
         let img_chunk_size = (img_len / (num_chunks * 4)) * 4;
 
         let chunks: Vec<(usize, &mut [u8])> = img.chunks_mut(img_chunk_size).enumerate().collect();
 
-        let col: Vec<Renderer> = chunks
-            .into_par_iter()
-            .map(|e| {
-                let buf_len = e.1.len();
+        chunks.into_par_iter().for_each(|e| {
+            let buf_len = e.1.len();
 
-                let acc_size = buf_len / 4;
+            let num_pixels = buf_len / 4;
 
-                let offset = e.0 * acc_size;
+            let offset = e.0 * num_pixels;
 
-                //let k = &mut img[offset..(offset + acc_size)];
+            let mut s = Renderer {
+                enable_accumulation: self.enable_accumulation,
+                max_frames_rendering: self.max_frames_rendering,
+                frame_index: self.frame_index,
+            };
 
-                let mut s = Renderer {
-                    //accumulated: k.to_vec(),
-                    enable_accumulation: self.enable_accumulation,
-                    max_frames_rendering: self.max_frames_rendering,
-                    frame_index: self.frame_index,
-                };
-
-                let chunk = Chunk {
-                    size: acc_size,
-                    pixel_offset: offset,
-                };
-
-                s.render_chunk(scene, camera, chunk, e.1);
-                s
-            })
-            .collect();
+            s.render_chunk(scene, camera, num_pixels, offset, e.1);
+        });
 
         texture
             .update(None, img.as_slice(), camera.resolution.x as usize * 4)
