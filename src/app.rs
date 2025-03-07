@@ -52,7 +52,7 @@ impl App3D {
         let mut timer = Instant::now();
         let start = Instant::now();
 
-        let nanos = 1000000000. / 80.;
+        let nanos = 1000000000. / 60.;
         let mut delta: f64 = 0.;
         let mut ups = 0u32;
         let mut fps = 0u32;
