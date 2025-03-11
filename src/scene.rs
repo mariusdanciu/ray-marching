@@ -80,8 +80,8 @@ impl Scene {
         let sundot = ray.direction.dot(-l.direction(Vec3::ZERO)).clamp(0.0, 1.0);
 
         res += 0.25 * vec3(1.0, 0.7, 0.4) * sundot.powf(5.0);
-        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(64.0);
-        res += 0.25 * vec3(1.0, 0.8, 0.6) * sundot.powf(512.0);
+        res += 0.25 * vec3(1.0, 0.6, 0.6) * sundot.powf(64.0);
+        res += 0.25 * vec3(1.0, 0.9, 0.6) * sundot.powf(512.0);
 
         if let Some(hit) = rm.march_ray(ray) {
             //res = Vec3::ZERO;

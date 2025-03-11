@@ -1,4 +1,4 @@
-use glam::{ivec2, uvec2, vec2, vec3, Mat4, UVec2, Vec2, Vec3, Vec4};
+use glam::{ivec2, uvec2, vec2, vec3, Mat4, UVec2, Vec2, Vec3, Vec4, Vec4Swizzles};
 
 use crate::utils::math;
 
@@ -59,7 +59,7 @@ impl Camera {
 
                     let fd = rotation * Vec4::new(self.ww.x, self.ww.y, self.ww.z, 1.);
 
-                    self.ww = Vec3::new(fd.x, fd.y, fd.z).normalize();
+                    self.ww = fd.xyz().normalize();
                     self.uu = self.ww.cross(vec3(0., 1., 0.)).normalize();
                     self.vv = self.uu.cross(self.ww).normalize();
                 }

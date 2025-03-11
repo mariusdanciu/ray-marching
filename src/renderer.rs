@@ -66,6 +66,9 @@ impl Renderer {
         updated: bool,
         num_chunks: usize,
     ) -> Result<(), String> {
+        if !updated {
+            return Ok(())
+        }
         let img_len = img.len();
         let img_chunk_size = (img_len / (num_chunks * 4)) * 4;
 

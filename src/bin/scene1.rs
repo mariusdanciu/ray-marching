@@ -32,7 +32,9 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
     //let d1 = plane_sdf(p, vec3(0., 0., 0.), vec3(0., 1., 0.));
     let fh = -0.1 + 0.5 * ((p.x * 0.5).sin() + (p.z * 0.5).sin());
     let d1 = p.y - fh;
-
+    let mut d2 = 0.0f32;
+    let mut d3 = 0.0f32;
+    let mut d4 = 0.0f32;
     d = d1;
     mat = 0;
 
@@ -52,14 +54,14 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
             let radius = radius + 0.05 * (0.5 + (16.0 * (q.x / q.z).atan()).sin() * 0.5).powf(2.);
             let radius = radius + 0.05 * (0.5 + 0.5 * (q.y * 10.0).sin()).powf(0.1);
 
-            let d2 = cylinder_sdf(q, radius, 0.0, 3.) * 0.5;
+            d2 = cylinder_sdf(q, radius, 0.0, 3.) * 0.5;
 
             d = d.min(d2);
 
             let mut q = vec3(0., 1.5, 0.2) - p;
 
             q = vec3(q.x, (q.y + 0.1).abs() - 1.5, q.z);
-            let d3 = box_sdf(q, vec3(0.5, 0.1, 0.5), 0.1) * 0.5;
+            d3 = box_sdf(q, vec3(0.5, 0.1, 0.5), 0.1) * 0.5;
 
             d = d.min(d3);
         }
@@ -68,11 +70,13 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
         let q = vec3(-1., 0.8, 7.) - p;
         //let tex = scene.textures[3].from_uv(q.x, q.y).y / 25.;
         let r = 0.8;
-        let d4 = sphere_sdf(q, r) * 0.5;
+        d4 = sphere_sdf(q, r) * 0.5;
+
+        d4 = math::smooth_min(d1, d4, 1.);
         d = d.min(d4);
     }
 
-    if d == d1 {
+    if d == d1 || d == d4 {
         col = scene.materials[0].albedo;
         let f = 0.2
             * (-1.

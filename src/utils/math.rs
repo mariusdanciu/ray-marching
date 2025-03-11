@@ -46,7 +46,7 @@ pub fn interpolation(d1: f32, d2: f32, k: f32) -> f32 {
     (0.5 + 0.5 * (d2 - d1) / k).clamp(0., 1.)
 }
 
-pub fn smooth_union(d1: f32, d2: f32, k: f32) -> f32 {
+pub fn smooth_min(d1: f32, d2: f32, k: f32) -> f32 {
     let h = (0.5 + 0.5 * (d2 - d1) / k).clamp(0., 1.);
 
     return mix(d2, d1, h) - k * h * (1. - h);
