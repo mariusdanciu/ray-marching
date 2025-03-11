@@ -107,10 +107,8 @@ impl Scene {
                 32.,
             );
 
-            let mut lightning = sun
-                * shadow
-                * l.albedo();
-               // * math::pow_vec3(Vec3::splat(shadow), vec3(1.3, 1.2, 1.5));
+            let mut lightning = sun * shadow * l.albedo();
+            // * math::pow_vec3(Vec3::splat(shadow), vec3(1.3, 1.2, 1.5));
 
             lightning += sky * occlusion;
             lightning += indirect * l.albedo() * occlusion;
