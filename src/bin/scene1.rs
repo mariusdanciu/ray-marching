@@ -143,7 +143,7 @@ pub fn main() -> Result<(), AppError> {
     );
     scene.ambient_color = (vec3(0.5, 0.8, 1.));
     scene.lights = vec![Light::Directional(Directional {
-        albedo: vec3(0.40, 0.28, 0.20),
+        albedo: vec3(1., 0.85, 0.70),
         direction: vec3(-1., -0.5, -5.).normalize(),
         intensity: 1.,
     })];

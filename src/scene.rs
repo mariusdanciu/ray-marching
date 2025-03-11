@@ -88,7 +88,6 @@ impl Scene {
             let p = ray.origin + ray.direction * hit.dist;
             let n = rm.normal(p);
 
-            let mat = self.materials[hit.material_index];
             let mut col = hit.color;
 
             let occlusion = rm.occlusion(p, n);
@@ -108,13 +107,14 @@ impl Scene {
                 32.,
             );
 
-            let mut lin = sun
-                * vec3(1.64, 1.27, 0.99)
-                * math::pow_vec3(Vec3::splat(shadow), vec3(1.0, 1.2, 1.5));
-            lin += sky * occlusion;
-            lin += indirect * l.albedo() * occlusion;
+            let mut lightning = sun * shadow
+                * l.albedo()
+                * math::pow_vec3(Vec3::splat(shadow), vec3(1.5, 1.2, 1.5));
 
-            col *= lin;
+            lightning += sky * occlusion;
+            lightning += indirect * l.albedo() * occlusion;
+
+            col *= lightning;
 
             //col = math::fog(col, hit.dist, ray, 0.2);
 
