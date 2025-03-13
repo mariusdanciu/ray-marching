@@ -90,6 +90,7 @@ impl Scene {
 
             let mut col = hit.color;
 
+            let mat = self.materials[hit.material_index];
             let occlusion = rm.occlusion(p, n);
             let light_dir = -l.direction(p);
 
@@ -107,11 +108,16 @@ impl Scene {
                 32.,
             );
 
-            let mut lightning = sun * shadow * l.albedo();
-            // * math::pow_vec3(Vec3::splat(shadow), vec3(1.3, 1.2, 1.5));
+            let half_angle = (-ray.direction - l.direction(p)).normalize();
+            let shininess = (n.dot(half_angle)).max(0.).powf(mat.shininess);
+            let mut lightning = sun
+                * shadow
+                * l.albedo()
+                * math::pow_vec3(Vec3::splat(shadow), vec3(1.3, 1.2, 1.5));
 
             lightning += sky * occlusion;
             lightning += indirect * l.albedo() * occlusion;
+            lightning += mat.specular * shininess * l.albedo();
 
             col *= lightning * l.intensity();
 
