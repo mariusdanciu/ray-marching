@@ -102,8 +102,8 @@ pub fn main() -> Result<(), AppError> {
             Material {
                 ambience: 0.5,
                 diffuse: 0.2,
-                shininess: 85.,
-                specular: 0.8,
+                shininess: 55.,
+                specular: 0.4,
                 albedo: Vec3::new(0.8, 0.6, 0.4),
                 kind: MaterialType::Reflective { roughness: 1. },
                 ..Default::default()

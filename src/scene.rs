@@ -117,7 +117,7 @@ impl Scene {
 
             lightning += sky * occlusion;
             lightning += indirect * l.albedo() * occlusion;
-            lightning += mat.specular * shininess * l.albedo();
+            lightning += mat.specular * shininess * shadow * l.albedo();
 
             col *= lightning * l.intensity();
 
