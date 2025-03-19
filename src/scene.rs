@@ -8,7 +8,7 @@ use crate::light::{Light, LightSource};
 use crate::ray::Ray;
 use crate::ray_marching::RayMarching;
 use crate::utils::materials::Material;
-use crate::utils::math;
+use crate::utils::math::{self, pow_vec3};
 use crate::utils::texture::Texture;
 
 #[derive(Debug, Clone)]
@@ -58,7 +58,11 @@ impl Scene {
     }
 
     pub fn color(&self, camera: &Camera, coord: Vec2) -> Vec3 {
-        let p = (2.0 * coord - camera.resolution) / (1. - camera.resolution.y);
+        //let p = (2.0 * coord - camera.resolution) / (1. - camera.resolution.y);
+        let ratio = camera.resolution.x / camera.resolution.y;
+        let p_ndc = coord / camera.resolution;
+
+        let p = vec2((2.0 * p_ndc.x - 1.) * ratio, 1. - 2.0 * p_ndc.y);
 
         let ray = &Ray {
             origin: camera.position,
@@ -67,10 +71,11 @@ impl Scene {
 
         let rm = RayMarching { scene: self };
 
-        let sky = vec3(0.5, 0.7, 0.8) - (0.5 * ray.direction.y).clamp(0.0, 1.0);
+        let sky = vec3(0.5, 0.8, 0.9) - (0.5 * ray.direction.y).clamp(0.0, 1.0);
+
         let sky = math::mix_vec3(
             sky,
-            vec3(0.6, 0.7, 0.8),
+            vec3(0.5, 0.7, 0.9),
             (-10.0 * ray.direction.y.max(0.0)).exp(),
         );
         let mut res = sky;
@@ -87,6 +92,7 @@ impl Scene {
             //res = Vec3::ZERO;
             let p = ray.origin + ray.direction * hit.dist;
             let n = rm.normal(p);
+            let refl = math::reflect(ray.direction, n);
 
             let mut col = hit.color;
 
@@ -96,8 +102,7 @@ impl Scene {
 
             let sun = n.dot(light_dir).clamp(0.0, 1.0);
 
-            let indirect = n
-                .dot((light_dir * vec3(-1.0, 0.0, -1.0)).normalize())
+            let indirect = (0.1 + 0.3 * n.dot((light_dir * vec3(-1.0, 0.0, -1.0)).normalize()))
                 .clamp(0.0, 1.0);
 
             let shadow = rm.shadow(

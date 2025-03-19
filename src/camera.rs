@@ -44,15 +44,15 @@ impl Camera {
             match event {
                 CameraEvent::Up => self.position += self.ww * speed * ts,
                 CameraEvent::Down => self.position -= self.ww * speed * ts,
-                CameraEvent::Left => self.position += self.uu * speed * ts,
-                CameraEvent::Right => self.position -= self.uu * speed * ts,
+                CameraEvent::Left => self.position -= self.uu * speed * ts,
+                CameraEvent::Right => self.position += self.uu * speed * ts,
                 CameraEvent::Resize { w, h } => {
                     self.resolution = vec2(*w as f32, *h as f32);
                 }
 
                 CameraEvent::RotateXY { delta } => {
                     let pitch_delta = delta.y * rotation_speed;
-                    let yaw_delta = delta.x * rotation_speed;
+                    let yaw_delta = -delta.x * rotation_speed;
 
                     let rotation = Mat4::from_rotation_x(pitch_delta as f32 * math::DEGREES)
                         * Mat4::from_rotation_y(yaw_delta as f32 * math::DEGREES);
