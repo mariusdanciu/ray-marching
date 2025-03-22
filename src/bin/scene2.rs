@@ -37,7 +37,7 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
         let r = 0.8;
         d2 = sphere_sdf(q, r) * 0.5;
 
-        d2 = math::smooth_min(d1, d2, 1.);
+        //d2 = math::smooth_min(d1, d2, 1.);
         d = d.min(d2);
     }
 
@@ -71,7 +71,7 @@ pub fn main() -> Result<(), AppError> {
                 shininess: 55.,
                 specular: 0.4,
                 albedo: Vec3::new(0.8, 0.6, 0.4),
-                kind: MaterialType::Reflective { roughness: 1. },
+                kind: MaterialType::Reflective { roughness: 0.5 },
                 ..Default::default()
             },
             Material {
@@ -80,7 +80,7 @@ pub fn main() -> Result<(), AppError> {
                 shininess: 120.,
                 specular: 1.1,
                 albedo: Vec3::new(0.8, 0.6, 0.4),
-                kind: MaterialType::Reflective { roughness: 1. },
+                kind: MaterialType::Reflective { roughness: 0.5 },
                 ..Default::default()
             },
             Material {
@@ -89,19 +89,9 @@ pub fn main() -> Result<(), AppError> {
                 shininess: 50.,
                 specular: 2.5,
                 albedo: Vec3::new(0.0, 0.4, 1.),
-                kind: MaterialType::Reflective { roughness: 1. },
+                kind: MaterialType::Reflective { roughness: 0.5 },
                 ..Default::default()
-            },
-            Material {
-                ambience: 0.3,
-                diffuse: 0.4,
-                shininess: 84.,
-                specular: 0.8,
-                albedo: Vec3::new(0.0, 0.4, 1.),
-                kind: MaterialType::Reflective { roughness: 1. },
-                texture: Some(3),
-                ..Default::default()
-            },
+            }
         ],
         sdf,
         update,

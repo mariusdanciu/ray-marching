@@ -9,7 +9,7 @@ use crate::utils::materials::Material;
 
 static MAX_STEPS: usize = 300;
 static MAX_DISTANCE: f32 = 40.;
-pub static HIT_PRECISION: f32 = 0.001;
+pub static HIT_PRECISION: f32 = 0.0001;
 static INV_PI: f32 = 1. / f32::consts::PI;
 
 #[derive(Debug, Clone)]
