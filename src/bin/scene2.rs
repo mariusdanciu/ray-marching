@@ -32,12 +32,12 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
     mat = 0;
 
     {
-        let q = p - vec3(0., 1., 7.);
+        let q = p - vec3(0., 1.4, 7.);
         //let tex = scene.textures[3].from_uv(q.x, q.y).y / 25.;
         let r = 0.8;
         d2 = sphere_sdf(q, r) * 0.5;
 
-        //d2 = math::smooth_min(d1, d2, 1.);
+        d2 = math::smooth_min(d1, d2, 1.);
         d = d.min(d2);
     }
 
@@ -53,6 +53,8 @@ fn sdf(scene: &Scene, ray: &Ray, t: f32) -> Hit {
     if d == d3 {
         mat = 2;
         col = scene.materials[2].albedo;
+    } else if d == d1 {
+       // col = scene.textures[2].from_uv(p.x*0.1, p.z*0.1);
     }
 
     Hit {
